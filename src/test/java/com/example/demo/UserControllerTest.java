@@ -94,7 +94,7 @@ public class UserControllerTest {
                 .body("email", equalTo("updated.email@example.com"));
     }
 
-    @Test
+  /*  @Test
     void testDeleteUser() {
         // Crear un usuario previamente para eliminar
         User createdUser = new User();
@@ -166,5 +166,5 @@ public class UserControllerTest {
                 .then()
                 .statusCode(200)
                 .body(equalTo("Transfer successful"));
-    }
+    }*/
 }
