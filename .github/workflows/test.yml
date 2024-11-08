@@ -1,4 +1,4 @@
-name: Java CI with Gradle
+name: Java CI with Maven
 
 on:
   push:
@@ -16,11 +16,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up JDK 17
+      - name: Set up JDK 11
         uses: actions/setup-java@v2
         with:
-          distribution: ' AdoptOpenJDK'   # Aquí se especifica la distribución de Java.
-          java-version: '17'  # La versión de Java que quieres usar, por ejemplo 11.
+          distribution: 'adoptopenjdk'  # Aquí especificas la distribución de Java
+          java-version: '11'           # La versión de Java que usas, por ejemplo, 11.
 
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Build with Maven
+        run: mvn clean install   # Comando para construir el proyecto con Maven
