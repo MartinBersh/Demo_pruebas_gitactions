@@ -11,11 +11,13 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class UserService {
 
-    private final List<User> users = new ArrayList<>();
+    private final List<User> users;
     private final AtomicLong counter = new AtomicLong();
 
     public UserService(List<User> users) {
+        this.users = users;
     }
+
 
 
     public User createUser(User user) {
