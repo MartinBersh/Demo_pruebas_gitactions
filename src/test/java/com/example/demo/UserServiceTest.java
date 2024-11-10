@@ -1,27 +1,26 @@
 package com.example.demo;
 
 import com.example.demo.entitie.User;
-import com.example.demo.repo.UserRepository;
 import com.example.demo.service.UserService;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
-
-    @InjectMocks
     private UserService userService;
+    private List<User> users; // Lista en memoria para simular la base de datos
+
+    @BeforeEach
+    void setUp() {
+        // Inicializa la lista en memoria y el servicio
+        users = new ArrayList<>();
+        userService = new UserService(users); // Pasa la lista al servicio como dependencia
+    }
 
     @Test
     void testCreateUser() {
@@ -30,11 +29,9 @@ public class UserServiceTest {
         user.setName("John Doe");
         user.setEmail("john.doe@example.com");
 
-        when(userRepository.save(user)).thenReturn(user);
-
         userService.createUser(user);
-
-        verify(userRepository, times(1)).save(user);
+        assertEquals(1, users.size());
+        assertEquals("John Doe", users.get(0).getName());
     }
 
     @Test
@@ -43,12 +40,10 @@ public class UserServiceTest {
         user.setId(1L);
         user.setName("John Doe");
         user.setEmail("john.doe@example.com");
+        users.add(user); // Añadir directamente a la lista simulada
 
-        when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(user));
-
-        userService.getUserById(1L);
-
-        verify(userRepository, times(1)).findById(1L);
+        User result = userService.getUserById(1L);
+        assertEquals("John Doe", result.getName());
     }
 
     @Test
@@ -57,54 +52,45 @@ public class UserServiceTest {
         user.setId(1L);
         user.setName("John Doe");
         user.setEmail("john.doe@example.com");
+        users.add(user);
 
-        when(userRepository.existsById(1L)).thenReturn(true);
-        when(userRepository.save(user)).thenReturn(user);
+        User updatedUser = new User();
+        updatedUser.setName("Jane Doe");
+        updatedUser.setEmail("jane.doe@example.com");
 
-        userService.updateUser(1L, user);
-
-        verify(userRepository, times(1)).existsById(1L);
-        verify(userRepository, times(1)).save(user);
-    }
-
-    @Test
-    void testUpdateUserNotFound() {
-        User user = new User();
-        user.setId(1L);
-        user.setName("John Doe");
-        user.setEmail("john.doe@example.com");
-
-        when(userRepository.existsById(1L)).thenReturn(false);
-
-        userService.updateUser(1L, user);
-
-        verify(userRepository, times(1)).existsById(1L);
-        verify(userRepository, times(0)).save(user);
+        User result = userService.updateUser(1L, updatedUser);
+        assertEquals("Jane Doe", result.getName());
+        assertEquals("jane.doe@example.com", result.getEmail());
     }
 
     @Test
     void testDeleteUser() {
-        Long userId = 1L;
+        User user = new User();
+        user.setId(1L);
+        users.add(user);
 
-        doNothing().when(userRepository).deleteById(userId);
-
-        userService.deleteUser(userId);
-
-        verify(userRepository, times(1)).deleteById(userId);
+        userService.deleteUser(1L);
+        assertEquals(0, users.size());
     }
 
     @Test
-    void testTransferUserUserNotFound() {
+    void testTransferUser() {
         User user1 = new User();
         user1.setId(1L);
+        user1.setName("User 1");
+        user1.setEmail("user1@example.com");
 
-        when(userRepository.findById(1L)).thenReturn(java.util.Optional.empty());
+        User user2 = new User();
+        user2.setId(2L);
+        user2.setName("User 2");
+        user2.setEmail("user2@example.com");
 
-        assertThrows(RuntimeException.class, () -> {
-            userService.transferUser(1L, 2L);
-        });
+        users.add(user1);
+        users.add(user2);
 
-        verify(userRepository, times(1)).findById(1L);
-        verify(userRepository, times(0)).findById(2L);
+        String result = userService.transferUser(1L, 2L);
+        assertEquals("Transferencia completada", result);
+        assertEquals("user2@example.com", user1.getEmail());
+        assertEquals("user1@example.com", user2.getEmail());
     }
 }

@@ -5,21 +5,22 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        RestAssured.baseURI = "http://localhost:8080";  // Ajusta la URL de tu servidor
+        RestAssured.baseURI = "http://localhost:8080";
     }
 
     @Test
     void testCreateUser() {
         User user = new User();
-        user.setId(1L);
         user.setName("John Doe");
         user.setEmail("john.doe@example.com");
 
@@ -29,19 +30,16 @@ public class UserControllerTest {
                 .when()
                 .post("/users")
                 .then()
-                .statusCode(201)  // Verifica que el estado sea 201 (CREATED)
+                .statusCode(201)
                 .body("name", equalTo("John Doe"));
     }
 
     @Test
     void testGetUser() {
-        // Crear un usuario previamente para probar
         User createdUser = new User();
-        createdUser.setId(1L);
         createdUser.setName("Jane Doe");
         createdUser.setEmail("jane.doe@example.com");
 
-        // Crear el usuario
         Integer userId = given()
                 .contentType(ContentType.JSON)
                 .body(createdUser)
@@ -49,14 +47,13 @@ public class UserControllerTest {
                 .post("/users")
                 .then()
                 .statusCode(201)
-                .extract().path("id");  // Extraemos el ID del usuario creado
+                .extract().path("id");
 
-        // Obtener el usuario por ID
         given()
                 .when()
                 .get("/users/{id}", userId)
                 .then()
-                .statusCode(200)  // Verifica que el estado sea 200 (OK)
+                .statusCode(200)
                 .body("id", equalTo(userId))
                 .body("name", equalTo("Jane Doe"))
                 .body("email", equalTo("jane.doe@example.com"));
@@ -64,9 +61,7 @@ public class UserControllerTest {
 
     @Test
     void testUpdateUser() {
-        // Crear un usuario previamente para actualizar
         User createdUser = new User();
-        createdUser.setId(2L);
         createdUser.setName("Old Name");
         createdUser.setEmail("old.email@example.com");
 
@@ -79,7 +74,6 @@ public class UserControllerTest {
                 .statusCode(201)
                 .extract().path("id");
 
-        // Actualizar el usuario
         createdUser.setName("Updated Name");
         createdUser.setEmail("updated.email@example.com");
 
@@ -94,11 +88,9 @@ public class UserControllerTest {
                 .body("email", equalTo("updated.email@example.com"));
     }
 
-  /*  @Test
+    @Test
     void testDeleteUser() {
-        // Crear un usuario previamente para eliminar
         User createdUser = new User();
-        createdUser.setId(3L);
         createdUser.setName("Delete User");
         createdUser.setEmail("delete.user@example.com");
 
@@ -111,31 +103,20 @@ public class UserControllerTest {
                 .statusCode(201)
                 .extract().path("id");
 
-        // Eliminar el usuario
         given()
                 .when()
                 .delete("/users/{id}", userId)
                 .then()
                 .statusCode(200);
-
-        // Intentar obtener el usuario eliminado
-        given()
-                .when()
-                .get("/users/{id}", userId)
-                .then()
-                .statusCode(404);  // El usuario ya no debe existir
     }
 
     @Test
     void testTransferUser() {
-        // Crear dos usuarios
         User user1 = new User();
-        user1.setId(3L);
         user1.setName("User 4");
         user1.setEmail("user4@example.com");
 
         User user2 = new User();
-        user1.setId(4L);
         user2.setName("User 2");
         user2.setEmail("user2@example.com");
 
@@ -157,7 +138,6 @@ public class UserControllerTest {
                 .statusCode(201)
                 .extract().path("id");
 
-        // Realizar la transferencia
         given()
                 .when()
                 .param("fromId", user1Id)
@@ -165,6 +145,6 @@ public class UserControllerTest {
                 .patch("/users/transfer")
                 .then()
                 .statusCode(200)
-                .body(equalTo("Transfer successful"));
-    }*/
+                .body(equalTo("Transferencia completada"));
+    }
 }

@@ -1,46 +1,64 @@
 package com.example.demo.service;
 
 import com.example.demo.entitie.User;
-import com.example.demo.repo.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final List<User> users = new ArrayList<>();
+    private final AtomicLong counter = new AtomicLong();
+
+    public UserService(List<User> users) {
+    }
+
 
     public User createUser(User user) {
-        return userRepository.save(user);
+        user.setId(counter.incrementAndGet());
+        users.add(user);
+        return user;
     }
 
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+        return users.stream()
+                .filter(user -> user.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     public User updateUser(Long id, User user) {
-        if (userRepository.existsById(id)) {
-            user.setId(id);
-            return userRepository.save(user);
+        Optional<User> existingUser = users.stream()
+                .filter(u -> u.getId().equals(id))
+                .findFirst();
+
+        if (existingUser.isPresent()) {
+            User u = existingUser.get();
+            u.setName(user.getName());
+            u.setEmail(user.getEmail());
+            return u;
         }
         return null;
     }
 
     public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+        users.removeIf(user -> user.getId().equals(id));
     }
 
-    @Transactional
     public String transferUser(Long fromUserId, Long toUserId) {
-        // Simula una transacción
-        User fromUser = userRepository.findById(fromUserId).orElseThrow();
-        User toUser = userRepository.findById(toUserId).orElseThrow();
-        // Realizar alguna acción, por ejemplo, transferir un campo
-        String temp = fromUser.getEmail();
-        fromUser.setEmail(toUser.getEmail());
-        toUser.setEmail(temp);
-        return "Transferencia completada";
+        User fromUser = getUserById(fromUserId);
+        User toUser = getUserById(toUserId);
+
+        if (fromUser != null && toUser != null) {
+            String temp = fromUser.getEmail();
+            fromUser.setEmail(toUser.getEmail());
+            toUser.setEmail(temp);
+            return "Transferencia completada";
+        }
+        return "Usuarios no encontrados";
     }
 }
