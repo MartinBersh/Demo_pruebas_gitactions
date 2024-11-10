@@ -4,12 +4,13 @@ import com.example.demo.entitie.User;
 import com.example.demo.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+@ActiveProfiles("test")
 public class UserServiceTest {
 
     private UserService userService;
