@@ -26,5 +26,8 @@ jobs:
       - name: Build with Maven
         run: mvn clean install
 
+      - name: Set up SQLite
+        run: sudo apt-get install sqlite3 libsqlite3-dev
+
       - name: Run tests
         run: mvn test -Dspring.profiles.active=test
